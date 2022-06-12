@@ -1,0 +1,38 @@
+name: pokedex
+description: A PokeDex application utilizing the PokeAPI.
+
+publish_to: 'none' 
+
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+version: 0.0.1+1
+
+environment:
+  sdk: '>=2.18.0-170.0.dev <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+ dio: 4.0.6
+  dio_cache_interceptor: 3.2.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  uses-material-design: true
+
+  # assets:
+  #   - images/a_dot_burr.jpeg
+  #   - images/a_dot_ham.jpeg
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/assets-and-images/#resolution-aware
