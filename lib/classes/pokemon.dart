@@ -24,7 +24,11 @@ class Pokemon {
   });
 
   static Future<Pokemon?> fromURI(String uri) async {
-    final resp = await PokeApi.loadPokemon(uri, absolute: true);
+    if (uri.isEmpty) {
+      return null;
+    }
+
+    final resp = await PokeApi.loadSinglePokemon(uri, absolute: true);
 
     if (resp == null) {
       log('error retrieving pokemon from uri: $uri');
@@ -35,7 +39,11 @@ class Pokemon {
   }
 
   static Future<Pokemon?> fromIdentifier(String identifier) async {
-    var resp = await PokeApi.loadPokemon(identifier, absolute: false);
+    if (identifier.isEmpty) {
+      return null;
+    }
+
+    var resp = await PokeApi.loadSinglePokemon(identifier, absolute: false);
 
     if (resp == null) {
       log('error retrieving pokemon from identifier: $identifier');
@@ -45,13 +53,30 @@ class Pokemon {
     return _createPokemon(resp);
   }
 
+  static Future<List<Pokemon?>> getBunch(int count, {int offset = 0}) async {
+    var resp = await PokeApi.loadMultiplePokemon(count, offset);
+
+    if (resp.isEmpty) {
+      log('error retrieving $count Pokemon with offset=$offset');
+      return List.empty();
+    }
+
+    var result = <Pokemon?>[];
+
+    for (var x in resp) {
+      result.add(await Pokemon.fromURI(x['url'] ?? ''));
+    }
+
+    return result;
+  }
+
   static Pokemon _createPokemon(Map<String, dynamic> resp) {
     var sprites = resp['sprites']
       ..removeWhere(
           (key, value) => key == 'other' || key == 'versions' || value == null);
     sprites = sprites.entries.fold<List<Sprite>>(
       <Sprite>[],
-      (prev, x) => List<Sprite>.from(prev)
+      (prev, x) => List<Sprite>.of(prev)
         ..add(
           Sprite(
             name: x.key,
@@ -60,17 +85,11 @@ class Pokemon {
         ),
     );
 
-    // final List<String> moves = resp['moves']
-    //     .map((x) => x['move']['name'].toString())
-    //     .toList() as List<String>;
+    final moves = resp['moves'].fold<List<String>>(
+        <String>[], (prev, x) => List<String>.of(prev)..add(x['move']['name']));
 
-    final moves = resp['moves'].fold<List<String>>(<String>[],
-        (prev, x) => List<String>.from(prev)..add(x['move']['name']));
-
-    final types = resp['types'].fold<List<PokemonType>>(
-        <PokemonType>[],
-        (prev, x) =>
-            List<PokemonType>.from(prev)..add(PokemonType.fromJSON(x)));
+    final types = resp['types'].fold<List<PokemonType>>(<PokemonType>[],
+        (prev, x) => List<PokemonType>.of(prev)..add(PokemonType.fromJSON(x)));
 
     return Pokemon(
       id: resp['id'],
